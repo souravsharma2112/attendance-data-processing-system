@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import styles from "./style.module.css";
 import { Button, CheckboxComponent } from "../../ui";
+import { exportToExcel } from "../../../utils/exportExcelReport2";
+import { exportExcelReport1 } from "../../../utils/exportExcelReport1";
 
 type Employee = {
     id: number;
@@ -24,6 +26,13 @@ const ReportDownloadModal = ({
     const [format, setFormat] = useState("pdf");
 
     if (!isOpen) return null;
+    console.log(employees , "e");
+    
+
+    const handleDownload = () => {
+  exportExcelReport1(employees, [1, 2]);
+//   exportToExcel(employees, [1, 2]);
+};
 
     return (
         <div className={styles.overlay}>
@@ -81,6 +90,7 @@ const ReportDownloadModal = ({
                     <Button
                         title="Download Report"
                         className="w-full"
+                        onClick={handleDownload}
                     />
                 </div>
             </div>
