@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
-const getStatusShort = (item) => {
+const getStatusShort = (item: any) => {
   if (item.holiday) return "HO";
   if (item.week_off) return "WO";
   if (item.absent) return "A";
@@ -10,7 +10,10 @@ const getStatusShort = (item) => {
   return "P";
 };
 
-export const exportExcelReport1 = async (data, selectedIds = []) => {
+export const exportExcelReport1 = async (
+  data: any[],
+  selectedIds: number[] = []
+) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Attendance");
 
@@ -51,14 +54,14 @@ export const exportExcelReport1 = async (data, selectedIds = []) => {
   });
 
   // ---------------- DATA ----------------
-  selectedEmp.forEach((emp) => {
+  selectedEmp.forEach((emp: any) => {
     const empCode = emp.employee?.emp_code || "-";
     const name = `${emp.employee?.first_name || ""} ${
       emp.employee?.last_name || ""
     }`;
 
-    const attendanceMap = {};
-    (emp.attendances || []).forEach((att) => {
+    const attendanceMap: Record<number, any> = {};
+    (emp.attendances || []).forEach((att: any) => {
       const day = parseInt(att.date.split("-")[0], 10);
       attendanceMap[day] = att;
     });
@@ -96,9 +99,9 @@ export const exportExcelReport1 = async (data, selectedIds = []) => {
       statusRow.push(status);
     });
 
-    const r1 = worksheet.addRow(inRow);
-    const r2 = worksheet.addRow(outRow);
-    const r3 = worksheet.addRow(workRow);
+    worksheet.addRow(inRow);
+    worksheet.addRow(outRow);
+    worksheet.addRow(workRow);
     const r4 = worksheet.addRow(statusRow);
 
     // ✅ COLOR STATUS

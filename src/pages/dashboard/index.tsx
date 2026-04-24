@@ -6,6 +6,7 @@ import { EmployeeCard } from '../../components/cards'
 
 const Dashboard = () => {
   const { isLoading, data, isError } = useAttendanceAPI()
+  
   const { record } = useEmployeeReport({ employeeData: data ?? {} });
 
   if (isLoading) return <h1>Loading....</h1>

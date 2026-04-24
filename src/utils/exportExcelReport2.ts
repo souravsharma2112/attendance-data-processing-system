@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
-const getStatus = (item) => {
+const getStatus = (item: any) => {
   if (item.holiday) return "Holiday";
   if (item.week_off) return "WeekOff";
   if (item.absent) return "Absent";
@@ -10,7 +10,10 @@ const getStatus = (item) => {
   return "P";
 };
 
-export const exportExcelReport2 = async (data, selectedIds = []) => {
+export const exportExcelReport2 = async (
+  data: any[],
+  selectedIds: number[] = []
+) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Attendance");
 
@@ -26,8 +29,8 @@ export const exportExcelReport2 = async (data, selectedIds = []) => {
 
   const workingDates = [
     ...new Set(
-      selectedEmp.flatMap((emp) =>
-        (emp.attendances || []).map((att) => att.date)
+      selectedEmp.flatMap((emp: any) =>
+        (emp.attendances || []).map((att: any) => att.date)
       )
     ),
   ];
@@ -61,8 +64,8 @@ export const exportExcelReport2 = async (data, selectedIds = []) => {
     };
   });
 
-  selectedEmp.forEach((emp) => {
-    const rowData = {
+  selectedEmp.forEach((emp: any) => {
+    const rowData: any = {
       name: `${emp.employee?.first_name ?? ""} ${emp.employee?.last_name ?? ""}` || "-",
       designation: emp.employee?.designation || "-",
       department: emp.employee?.department_name || "-",
@@ -74,9 +77,9 @@ export const exportExcelReport2 = async (data, selectedIds = []) => {
       holiday: 0,
     };
 
-    const attendanceMap = {};
+    const attendanceMap: Record<string, string> = {};
 
-    (emp.attendances || []).forEach((att) => {
+    (emp.attendances || []).forEach((att: any) => {
       const status = getStatus(att);
       attendanceMap[att.date] = status;
 

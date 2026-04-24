@@ -7,6 +7,8 @@ const RightAside = ({ employees, record }) => {
     modalOpen: false,
     isPDF: false,
   });
+
+  
   const handleClick = (recordType) => {
     setIsModalOpen((prev) => ({
       isPDF: recordType === "record1" ? true : false,

@@ -1,20 +1,21 @@
-import React, { useState } from "react";
+import { memo, useState } from "react";
 import styles from "./style.module.css";
 import { Button, CheckboxComponent } from "../../ui";
 import { exportExcelReport2 } from "../../../utils/exportExcelReport2";
 import { exportExcelReport1 } from "../../../utils/exportExcelReport1";
+import useDownloadPdf from "../../../hooks/useDownloadPdf";
 
-type Employee = {
-    id: number;
+type EmployeeRecord = {
+    employeeID: number;
     name: string;
 };
 
 type Props = {
     isOpen: boolean;
     isPDF: boolean;
-    onClose: () => void;
-    employees: Employee[];
-    record: Employee[];
+    onClose: (recordType: string) => void;
+    employees: any[];
+    record: EmployeeRecord[];
 };
 
 const ReportDownloadModal = ({
@@ -26,8 +27,7 @@ const ReportDownloadModal = ({
 }: Props) => {
     const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
     const [format, setFormat] = useState("excel");
-    console.log(format, "format");
-
+   
     const recordType = isPDF ? "record1" : "record2";
     if (!isOpen) return null;
 
@@ -55,6 +55,8 @@ const ReportDownloadModal = ({
         }
     };
 
+    const downloadPDF = useDownloadPdf();
+
     const handleDownload = () => {
         if (selectedEmployees.length === 0) {
             alert("Please select at least one employee.");
@@ -65,6 +67,9 @@ const ReportDownloadModal = ({
         }
         if (recordType === "record1" && format === "excel") {
             exportExcelReport1(employees, selectedEmployees);
+        }
+        if (recordType === "record1" && format === "pdf") {
+            downloadPDF(employees,record ,selectedEmployees);
         }
     };
 
@@ -88,7 +93,7 @@ const ReportDownloadModal = ({
                                     name={`employee-${emp.employeeID}`}
                                     label={emp.name}
                                     checked={selectedEmployees.includes(emp.employeeID)}
-                                    onChange={(e) => handleCheckboxChange(emp.employeeID)}
+                                    onChange={() => handleCheckboxChange(emp.employeeID)}
                                 />
                             ))}
 
@@ -96,7 +101,7 @@ const ReportDownloadModal = ({
                                 name="employeeAll"
                                 label="Select All"
                                 checked={isAllSelected}
-                                onChange={(e) => handleSelectAll()}
+                                onChange={handleSelectAll}
                             />
                         </div>
                     </div>
@@ -148,4 +153,4 @@ const ReportDownloadModal = ({
     );
 };
 
-export default ReportDownloadModal;
+export default memo(ReportDownloadModal);
