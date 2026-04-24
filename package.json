@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",
     "@tailwindcss/vite": "^4.2.4",
+    "@types/file-saver": "^2.0.7",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "react": "^19.2.5",

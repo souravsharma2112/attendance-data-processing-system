@@ -12,7 +12,7 @@ const getStatus = (item: any) => {
 
 export const exportExcelReport2 = async (
   data: any[],
-  selectedIds: number[] = []
+  selectedIds: number[] = [],
 ) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Attendance");
@@ -30,31 +30,27 @@ export const exportExcelReport2 = async (
   const workingDates = [
     ...new Set(
       selectedEmp.flatMap((emp: any) =>
-        (emp.attendances || []).map((att: any) => att.date)
-      )
+        (emp.attendances || []).map((att: any) => att.date),
+      ),
     ),
   ];
 
-  const dateColumns = workingDates.map((date) => ({
-    header: date,
-    key: date,
-    width: 15,
-  }));
+  const dateColumns = workingDates.map((date) => date);
 
-  worksheet.columns = [
-    { header: "Employee Name", key: "name", width: 25 },
-    { header: "Designation", key: "designation", width: 20 },
-    { header: "Department", key: "department", width: 20 },
+  const header1 = worksheet.addRow([
+    "Employee Name",
+    "Designation",
+    "Department",
     ...dateColumns,
-    { header: "Total Present", key: "present", width: 15 },
-    { header: "Total Absent", key: "absent", width: 15 },
-    { header: "Total Leave", key: "leave", width: 15 },
-    { header: "Total Halfday", key: "halfday", width: 15 },
-    { header: "Total WeekOff", key: "weekoff", width: 15 },
-    { header: "Total Holiday", key: "holiday", width: 15 },
-  ];
+    "Total Present",
+    "Total Absent",
+    "Total Leave",
+    "Total Halfday",
+    "Total WeekOff",
+    "Total Holiday",
+  ]);
 
-  worksheet.getRow(1).eachCell((cell) => {
+  header1.eachCell((cell) => {
     cell.font = { bold: true };
     cell.alignment = { horizontal: "center" };
     cell.fill = {
@@ -64,18 +60,13 @@ export const exportExcelReport2 = async (
     };
   });
 
-  selectedEmp.forEach((emp: any) => {
-    const rowData: any = {
-      name: `${emp.employee?.first_name ?? ""} ${emp.employee?.last_name ?? ""}` || "-",
-      designation: emp.employee?.designation || "-",
-      department: emp.employee?.department_name || "-",
-      present: 0,
-      absent: 0,
-      leave: 0,
-      halfday: 0,
-      weekoff: 0,
-      holiday: 0,
-    };
+  const rows = selectedEmp.map((emp: any) => {
+    let present = 0;
+    let absent = 0;
+    let leave = 0;
+    let halfday = 0;
+    let weekoff = 0;
+    let holiday = 0;
 
     const attendanceMap: Record<string, string> = {};
 
@@ -83,24 +74,45 @@ export const exportExcelReport2 = async (
       const status = getStatus(att);
       attendanceMap[att.date] = status;
 
-      if (status === "P") rowData.present++;
-      if (status === "Absent") rowData.absent++;
-      if (status === "Leave") rowData.leave++;
-      if (status === "HalfDay") rowData.halfday++;
-      if (status === "WeekOff") rowData.weekoff++;
-      if (status === "Holiday") rowData.holiday++;
+      if (status === "P") present++;
+      if (status === "Absent") absent++;
+      if (status === "Leave") leave++;
+      if (status === "HalfDay") halfday++;
+      if (status === "WeekOff") weekoff++;
+      if (status === "Holiday") holiday++;
     });
 
-    workingDates.forEach((date) => {
-      rowData[date] = attendanceMap[date] || "";
-    });
+    const attendanceByDates = workingDates.map(
+      (date) => attendanceMap[date] || "",
+    );
 
-    const row = worksheet.addRow(rowData);
+    return [
+      `${emp.employee?.first_name ?? ""} ${emp.employee?.last_name ?? ""}` ||
+        "-",
+      emp.employee?.designation || "-",
+      emp.employee?.department_name || "-",
+      ...attendanceByDates,
+      present,
+      absent,
+      leave,
+      halfday,
+      weekoff,
+      holiday,
+    ];
+  });
 
-    workingDates.forEach((date) => {
-      const colIndex = worksheet.getColumn(date).number;
-      const cell = row.getCell(colIndex);
-      const value = rowData[date];
+  rows.forEach((item) => {
+    const rowData = worksheet.addRow(item);
+
+    item.forEach((value, index) => {
+      const cell = rowData.getCell(index + 1);
+
+      if (index < 3) return;
+
+      if (typeof value === "number") {
+        cell.alignment = { horizontal: "center" };
+        return;
+      }
 
       if (!value) return;
 
@@ -133,10 +145,39 @@ export const exportExcelReport2 = async (
           pattern: "solid",
           fgColor: { argb: color },
         };
-        cell.alignment = { horizontal: "center" };
+
+        cell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+        };
+
+        cell.font = {
+          bold: true,
+        };
       }
     });
   });
+
+  worksheet.columns.forEach((column : any) => {
+    let maxLength = 0;
+
+    column.eachCell({ includeEmpty: true }, (cell : any) => {
+      const cellValue = cell.value ? cell.value.toString() : "";
+      maxLength = Math.max(maxLength, cellValue.length);
+    });
+
+    column.width = maxLength + 2;
+  });
+  worksheet.eachRow({ includeEmpty: true }, (row) => {
+  row.eachCell({ includeEmpty: true }, (cell) => {
+    cell.border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+  });
+});
 
   const buffer = await workbook.xlsx.writeBuffer();
   saveAs(new Blob([buffer]), "Attendance_Report.xlsx");
