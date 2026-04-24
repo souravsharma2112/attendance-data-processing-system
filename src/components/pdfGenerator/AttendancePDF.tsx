@@ -1,9 +1,4 @@
-import {
-    Document,
-    Page,
-    Text,
-    View
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View} from "@react-pdf/renderer";
 import { styles } from "./AttendanceStyle";
 import { calculateSummary, getStatus } from "./pdfHelper";
 
@@ -100,25 +95,11 @@ const AttendancePDF = ({
         ? data.filter((emp) => selectedIds.includes(emp.employee.id))
         : data;
 
-    console.log(filteredData, "filtereddata hoon m");
-
-
     return (
         <Document>
             <Page size="A4" orientation="landscape" style={styles.page} wrap>
                 {filteredData.map((emp, index) => {
                     const summaryItems = calculateSummary(emp.attendances);
-                    const attendanceByDay = emp.attendances.reduce<Record<number, AttendanceItem>>((acc, attendance) => {
-                        const day = Number.parseInt(attendance.date.slice(0, 2), 10);
-                        if (!Number.isNaN(day)) {
-                            acc[day] = attendance;
-                        }
-                        return acc;
-                    }, {});
-
-                    console.log(attendanceByDay , "attendance day by dat hai bhai");
-                    
-
                     return (
                         <View key={index} style={styles.employeeSection} wrap={false}>
                             <View style={styles.header}>
@@ -167,8 +148,7 @@ const AttendancePDF = ({
                                         <View style={styles.cellLabel}>
                                             <Text style={styles.rowLabelText}>{row.label}</Text>
                                         </View>
-                                        {days.map((day, dayIndex) => {
-                                            const att = attendanceByDay[day];
+                                        {emp?.attendances?.map((att, dayIndex) => {
                                             let value = "-";
                                             if (att) {
                                                 if (row.key === "status") value = getStatus(att);
@@ -177,7 +157,7 @@ const AttendancePDF = ({
                                             }
                                             return (
                                                 <View
-                                                    key={day}
+                                                    key={`day-${dayIndex + 1}`}
                                                     style={getBodyCellStyle(
                                                         dayIndex === days.length - 1,
                                                         rowIndex,
