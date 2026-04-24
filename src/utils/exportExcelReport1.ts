@@ -4,6 +4,7 @@ import {
   calculateSummary,
   getStatus,
 } from "../components/pdfGenerator/pdfHelper";
+import type { AttendanceMonthlyRecordType } from "../types/AttendanceAPITypes";
 
 const formatDuration = (mins?: number | string) => {
   const totalMinutes = Number(mins);
@@ -24,7 +25,7 @@ const getSummaryValue = (
 ) => summaryData.find((item) => item.label === label)?.value ?? "-";
 
 export const exportExcelReport1 = async (
-  data: any[],
+  data: AttendanceMonthlyRecordType[],
   selectedIds: number[] = [],
 ) => {
   const workbook = new ExcelJS.Workbook();
@@ -43,15 +44,15 @@ export const exportExcelReport1 = async (
   const daysInMonth = 31;
   const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  selectedEmp.forEach((emp: any) => {
-    const summaryData = calculateSummary(emp.attendances);
-    const empCode = emp.employee?.emp_code || emp.employee?.id || "-";
-    const depart = emp.employee?.department_name || "N/A";
+  selectedEmp.forEach((emp) => {
+    const summaryData = calculateSummary(emp?.attendances);
+    const empCode = emp?.employee?.id ?? "-";
+    const depart = emp?.employee?.department_name ?? "N/A";
     const name =
-      `${emp.employee?.first_name || ""} ${emp.employee?.last_name || ""}`.trim() ||
+      `${emp.employee?.first_name ?? ""} ${emp.employee?.last_name ?? ""}`.trim() ||
       "-";
     const leaveCount = (emp.attendances || []).filter(
-      (att: any) => att.leave,
+      (att) => att.leave,
     ).length;
     const monthRow = worksheet.addRow([`January`]);
     const departmentRow = worksheet.addRow([`Department : ${depart}`]);

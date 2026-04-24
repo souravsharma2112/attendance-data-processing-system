@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { getAttendanceAPI } from '../services/attendenceApi';
+import type { AttendanceMonthlyRecordType } from "../types/AttendanceAPITypes";
 
 const useAttendanceAPI = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<AttendanceMonthlyRecordType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<string | null>(null);
 

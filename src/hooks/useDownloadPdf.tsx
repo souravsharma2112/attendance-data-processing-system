@@ -1,9 +1,10 @@
 import { pdf } from "@react-pdf/renderer";
 import AttendancePDF from "../components/pdfGenerator/AttendancePDF";
+import type { AttendanceMonthlyRecordType } from "../types/AttendanceAPITypes";
 
 const useDownloadPdf = () => {
     const downloadPDF = async (
-        data: any[],
+        data: AttendanceMonthlyRecordType[],
         record:any[],
         selectedIds: number[] = [],
         fileName = "attendance-report.pdf"

@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { EmployeeDataDefault, type EmployeeDataType } from "../types/card/EmployeeCardType";
+import type { AttendanceMonthlyRecordType } from "../types/AttendanceAPITypes";
 
-const useEmployeeReport = ({ employeeData }:any) => {
+const useEmployeeReport = ({ employeeData }:{employeeData : AttendanceMonthlyRecordType[]}) => {
   const record = useMemo(() => {
     if (!Array.isArray(employeeData)) return [];
 
@@ -14,9 +15,9 @@ const useEmployeeReport = ({ employeeData }:any) => {
       };
 
       if (Array.isArray(employee?.attendances)) {
-        employee.attendances.forEach((item:any) => {
+        employee.attendances.forEach((item) => {
           if (item?.leave) stats.absent += 1;
-          else if (item?.halfday) stats.halfday += 1;
+          else if (item?.half_day) stats.halfday += 1;
           else if (item?.week_off) {
             stats.weekoff += 1;
             stats.paid += 1;

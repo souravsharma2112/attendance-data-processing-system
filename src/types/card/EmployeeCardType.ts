@@ -13,7 +13,7 @@ export const EmployeeDataDefault = {
 }
 
 export interface EmployeeDataType {
-    employeeID: string;
+    employeeID: string | number;
     name: string;
     designation: string;
     present: number;

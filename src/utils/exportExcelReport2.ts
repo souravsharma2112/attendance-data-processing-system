@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import type { AttendanceMonthlyRecordType } from "../types/AttendanceAPITypes";
 
 const getStatus = (item: any) => {
   if (item.holiday) return "Holiday";
@@ -11,7 +12,7 @@ const getStatus = (item: any) => {
 };
 
 export const exportExcelReport2 = async (
-  data: any[],
+  data: AttendanceMonthlyRecordType[],
   selectedIds: number[] = [],
 ) => {
   const workbook = new ExcelJS.Workbook();
@@ -29,7 +30,7 @@ export const exportExcelReport2 = async (
 
   const workingDates = [
     ...new Set(
-      selectedEmp.flatMap((emp: any) =>
+      selectedEmp.flatMap((emp) =>
         (emp.attendances || []).map((att: any) => att.date),
       ),
     ),
