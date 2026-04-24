@@ -16,7 +16,7 @@ export const exportExcelReport2 = async (
 ) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Attendance");
-
+  worksheet.addRow([]);
   const selectedEmp =
     Array.isArray(selectedIds) && selectedIds.length
       ? data.filter((emp) => selectedIds.includes(emp?.employee?.id))
@@ -158,10 +158,10 @@ export const exportExcelReport2 = async (
     });
   });
 
-  worksheet.columns.forEach((column : any) => {
+  worksheet.columns.forEach((column: any) => {
     let maxLength = 0;
 
-    column.eachCell({ includeEmpty: true }, (cell : any) => {
+    column.eachCell({ includeEmpty: true }, (cell: any) => {
       const cellValue = cell.value ? cell.value.toString() : "";
       maxLength = Math.max(maxLength, cellValue.length);
     });
@@ -169,15 +169,19 @@ export const exportExcelReport2 = async (
     column.width = maxLength + 2;
   });
   worksheet.eachRow({ includeEmpty: true }, (row) => {
-  row.eachCell({ includeEmpty: true }, (cell) => {
-    cell.border = {
-      top: { style: "thin" },
-      left: { style: "thin" },
-      bottom: { style: "thin" },
-      right: { style: "thin" },
-    };
+    row.eachCell({ includeEmpty: true }, (cell) => {
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
   });
-});
+
+    worksheet.addRow([]);
+  worksheet.addRow([]);
+  worksheet.addRow([]);
 
   const buffer = await workbook.xlsx.writeBuffer();
   saveAs(new Blob([buffer]), "Attendance_Report.xlsx");
