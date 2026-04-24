@@ -1,6 +1,7 @@
-export const getIndividualAttendance = (attendances) => {
-  return attendances.map((item) => {
+export const getIndividualAttendance = (attendances:any) => {
+  return attendances.map((item :any) => {
     let status = "";
+console.log(status);
 
     if (item.holiday) status = "Holiday";
     else if (item.week_off) status = "WeekOff";
