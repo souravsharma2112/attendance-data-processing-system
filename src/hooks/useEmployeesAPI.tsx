@@ -3,8 +3,8 @@ import { getEmployeeAPI } from "../services/employeeApi";
 
 const useEmployeesAPI = () => {
   const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isError, setIsError] = useState<string|null>(null);
 
   useEffect(() => {
     const getData = async () => {

@@ -1,15 +1,15 @@
-import React, { memo, useState } from 'react'
+import { memo, useState } from 'react'
 import { Button } from '../../../components/ui'
 import { ReportDownloadModal } from '../../../components/modals'
 
-const RightAside = ({ employees, record }) => {
+const RightAside = ({ employees, record } : any) => {
   const [isModalOpen, setIsModalOpen] = useState({
     modalOpen: false,
     isPDF: false,
   });
 
   
-  const handleClick = (recordType) => {
+  const handleClick = (recordType : any) => {
     setIsModalOpen((prev) => ({
       isPDF: recordType === "record1" ? true : false,
       modalOpen: !prev.modalOpen,

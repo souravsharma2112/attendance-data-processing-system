@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { LeftAside, RightAside } from './_components'
 import useAttendanceAPI from '../../hooks/useAttendanceAPI'
 import useEmployeeReport from '../../hooks/useEmployeeReport'

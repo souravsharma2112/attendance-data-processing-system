@@ -207,8 +207,20 @@ export const exportExcelReport1 = async (
 
     const row1 = worksheet.addRow(inRow);
     const row2 = worksheet.addRow(outRow);
-    const row3 = worksheet.addRow(workRow);
+    worksheet.addRow(workRow);
     const row4 = worksheet.addRow(statusRow);
+
+    row1.eachCell((cell) => {
+      cell.font = {
+        color: { argb: "FF008000" },
+      };
+    });
+
+    row2.eachCell((cell) => {
+      cell.font = {
+        color: { argb: "FFFF0000" },
+      };
+    });
 
     row4.eachCell((cell, colNumber) => {
       if (colNumber === 1) return;
