@@ -14,9 +14,12 @@ const useEmployeeReport = ({ employeeData }:{employeeData : AttendanceMonthlyRec
         designation: employee?.employee?.designation ?? "---",
       };
 
+      
+
       if (Array.isArray(employee?.attendances)) {
         employee.attendances.forEach((item) => {
-          if (item?.leave) stats.absent += 1;
+          if (item?.absent) stats.absent += 1;
+         else if (item?.leave) return;
           else if (item?.half_day) stats.halfday += 1;
           else if (item?.week_off) {
             stats.weekoff += 1;

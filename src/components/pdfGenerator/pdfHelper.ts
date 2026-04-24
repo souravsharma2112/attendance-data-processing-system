@@ -23,15 +23,16 @@ export const calculateSummary = (attendances: AttendanceItem[] = []) => {
     };
 
     attendances.forEach((a: AttendanceItem) => {
+        summary.totalMinutes += a.total_work_duration || 0;
+        summary.breakDuration += a.break_duration || 0;
+        summary.outFormattedTime = "00:00";
         if (a.holiday) summary.holiday++;
         else if (a.week_off) summary.weekoff++;
         else if (a.absent) summary.absent++;
         else if (a.half_day) summary.halfday++;
+        else if (a.leave) "";
         else summary.present++;
         if (!a.absent) summary.paid++;
-        summary.totalMinutes += a.total_work_duration || 0;
-        summary.breakDuration += a.break_duration || 0;
-        summary.outFormattedTime = "00:00";
     });
 
     // return summary;
@@ -60,14 +61,14 @@ export const getStatus = (att: AttendanceItem) => {
 };
 
 export const formatDuration = (mins: number | string) => {
-  const totalMinutes = +mins;
+    const totalMinutes = +mins;
 
-  if (!totalMinutes) return "-";
+    if (!totalMinutes) return "-";
 
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
 
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}`;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}`;
 };
