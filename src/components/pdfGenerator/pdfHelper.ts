@@ -58,3 +58,16 @@ export const getStatus = (att: AttendanceItem) => {
     if (att.half_day) return "HD";
     return "P";
 };
+
+export const formatDuration = (mins: number | string) => {
+  const totalMinutes = +mins;
+
+  if (!totalMinutes) return "-";
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
+};

@@ -1,22 +1,11 @@
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import styles from "./style.module.css";
 import { Button, CheckboxComponent } from "../../ui";
 import { exportExcelReport2 } from "../../../utils/exportExcelReport2";
 import { exportExcelReport1 } from "../../../utils/exportExcelReport1";
 import useDownloadPdf from "../../../hooks/useDownloadPdf";
+import type { ReportDownloadModalType } from "../../../types/modal/ReportDownloadModalType";
 
-type EmployeeRecord = {
-    employeeID: number;
-    name: string;
-};
-
-type Props = {
-    isOpen: boolean;
-    isPDF: boolean;
-    onClose: (recordType: string) => void;
-    employees: any[];
-    record: EmployeeRecord[];
-};
 
 const ReportDownloadModal = ({
     isOpen,
@@ -24,18 +13,15 @@ const ReportDownloadModal = ({
     employees,
     isPDF = false,
     record,
-}: Props) => {
+}: ReportDownloadModalType) => {
+    if (!isOpen) return null;
     const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
     const [format, setFormat] = useState("excel");
-   
     const recordType = isPDF ? "record1" : "record2";
-    if (!isOpen) return null;
-
     const allEmployeeIds = record?.map((emp) => emp.employeeID) || [];
+    const isAllSelected = allEmployeeIds.length > 0 && selectedEmployees.length === allEmployeeIds.length;
 
-    const isAllSelected =
-        allEmployeeIds.length > 0 &&
-        selectedEmployees.length === allEmployeeIds.length;
+    const downloadPDF = useDownloadPdf();
 
     const handleCheckboxChange = (id: number) => {
         setSelectedEmployees((prev) =>
@@ -45,19 +31,16 @@ const ReportDownloadModal = ({
         );
     };
 
-    console.log(selectedEmployees);
-
-    const handleSelectAll = () => {
+    const handleSelectAll = useCallback(() => {
         if (isAllSelected) {
             setSelectedEmployees([]);
         } else {
             setSelectedEmployees(allEmployeeIds);
         }
-    };
+    }, [isAllSelected, allEmployeeIds]);
 
-    const downloadPDF = useDownloadPdf();
 
-    const handleDownload = () => {
+    const handleDownload = useCallback(() => {
         if (selectedEmployees.length === 0) {
             alert("Please select at least one employee.");
             return;
@@ -69,16 +52,15 @@ const ReportDownloadModal = ({
             exportExcelReport1(employees, selectedEmployees);
         }
         if (recordType === "record1" && format === "pdf") {
-            downloadPDF(employees,record ,selectedEmployees);
+            downloadPDF(employees, record, selectedEmployees);
         }
-    };
+    }, [selectedEmployees, format, employees, record, downloadPDF, recordType]);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         setSelectedEmployees([]);
         setFormat("excel");
         onClose(recordType);
-    }
-    console.log(record, "record");
+    }, [onClose, recordType]);
 
     return (
         <div className={styles.overlay}>

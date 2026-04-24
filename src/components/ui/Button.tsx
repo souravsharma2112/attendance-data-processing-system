@@ -1,3 +1,4 @@
+import { memo } from "react";
 
 type ButtonProps = {
   title: string;
@@ -23,4 +24,4 @@ const Button = ({
   );
 };
 
-export default Button;
+export default memo(Button);

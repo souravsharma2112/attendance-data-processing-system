@@ -1,6 +1,6 @@
 import { Document, Page, Text, View} from "@react-pdf/renderer";
 import { styles } from "./AttendanceStyle";
-import { calculateSummary, getStatus } from "./pdfHelper";
+import { calculateSummary, getStatus , formatDuration } from "./pdfHelper";
 
 type AttendanceItem = Record<string, any> & {
     absent?: boolean;
@@ -29,14 +29,6 @@ type AttendancePDFProps = {
     selectedIds?: number[];
     record?: any[];
 };
-
-const formatDuration = (mins?: number) => {
-    if (!mins) return "-";
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-};
-
 
 const getSummaryCellStyle = (isLast: boolean) =>
     isLast ? [styles.summaryCell, styles.summaryCellLast] : styles.summaryCell;
@@ -107,7 +99,7 @@ const AttendancePDF = ({
                                     EmpCode: {emp.employee.id} | Name: {emp.employee.first_name} {emp.employee.last_name}
                                 </Text>
                                 <Text style={styles.headerText}>
-                                    Dept: {emp.employee.department_name} | Desig: {emp.employee.designation}
+                                    Dept: {emp.employee.department_name ?? "N/A"} | Desig: {emp.employee.designation ?? "N/A"}
                                 </Text>
                             </View>
                             <View style={styles.summaryRow}>
@@ -152,7 +144,7 @@ const AttendancePDF = ({
                                             let value = "-";
                                             if (att) {
                                                 if (row.key === "status") value = getStatus(att);
-                                                else if (row.isDuration) value = formatDuration(att.duration);
+                                                else if (row.isDuration) value = formatDuration(att.duration ? att.duration : 0 );
                                                 else value = att[row.key] || "-";
                                             }
                                             return (

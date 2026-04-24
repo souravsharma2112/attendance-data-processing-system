@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 type CheckboxProps = {
   name: string;
@@ -31,4 +31,4 @@ const CheckboxComponent = ({
   );
 };
 
-export default CheckboxComponent;
+export default memo(CheckboxComponent);

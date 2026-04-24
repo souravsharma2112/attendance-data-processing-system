@@ -2,22 +2,11 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import {
   calculateSummary,
+  formatDuration,
   getStatus,
 } from "../components/pdfGenerator/pdfHelper";
 import type { AttendanceMonthlyRecordType } from "../types/AttendanceAPITypes";
 
-const formatDuration = (mins?: number | string) => {
-  const totalMinutes = Number(mins);
-
-  if (!totalMinutes) return "-";
-
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}`;
-};
 
 const getSummaryValue = (
   summaryData: Array<{ label: string; value: any }>,
