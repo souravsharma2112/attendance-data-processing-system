@@ -1,15 +1,9 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { calculateSummary } from "../components/pdfGenerator/pdfHelper";
-
-const getStatusShort = (item: any) => {
-  if (item.holiday) return "HO";
-  if (item.week_off) return "WO";
-  if (item.absent) return "A";
-  if (item.leave) return "L";
-  if (item.half_day) return "HD";
-  return "P";
-};
+import {
+  calculateSummary,
+  getStatus,
+} from "../components/pdfGenerator/pdfHelper";
 
 const formatDuration = (mins?: number | string) => {
   const totalMinutes = Number(mins);
@@ -24,12 +18,14 @@ const formatDuration = (mins?: number | string) => {
     .padStart(2, "0")}`;
 };
 
-const getSummaryValue = (summaryData: Array<{ label: string; value: any }>, label: string) =>
-  summaryData.find((item) => item.label === label)?.value ?? "-";
+const getSummaryValue = (
+  summaryData: Array<{ label: string; value: any }>,
+  label: string,
+) => summaryData.find((item) => item.label === label)?.value ?? "-";
 
 export const exportExcelReport1 = async (
   data: any[],
-  selectedIds: number[] = []
+  selectedIds: number[] = [],
 ) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Attendance");
@@ -46,39 +42,63 @@ export const exportExcelReport1 = async (
 
   const daysInMonth = 31;
   const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const totalWorksheetColumns = dates.length + 1;
-  const summaryHeaders = [
-    "EmpCode",
-    "Name",
-    "Present",
-    "Holiday",
-    "WeekOff",
-    "HalfDay",
-    "Absent",
-    "Leave",
-    "PaidDay",
-    "Total Work Hrs",
-  ];
-
-  worksheet.mergeCells(1, 1, 1, totalWorksheetColumns);
-  worksheet.getCell("A1").value = "Month : January";
-  worksheet.getCell("A1").alignment = { horizontal: "center" };
-  worksheet.getCell("A1").font = { bold: true, size: 14 };
-
-  worksheet.columns = [
-    { header: "Label", width: 14 },
-    ...dates.map((day) => ({ header: day.toString(), width: 10 })),
-  ];
 
   selectedEmp.forEach((emp: any) => {
     const summaryData = calculateSummary(emp.attendances);
     const empCode = emp.employee?.emp_code || emp.employee?.id || "-";
-    const name = `${emp.employee?.first_name || ""} ${
-      emp.employee?.last_name || ""
-    }`.trim() || "-";
-    const leaveCount = (emp.attendances || []).filter((att: any) => att.leave).length;
+    const depart = emp.employee?.department_name || "N/A";
+    const name =
+      `${emp.employee?.first_name || ""} ${emp.employee?.last_name || ""}`.trim() ||
+      "-";
+    const leaveCount = (emp.attendances || []).filter(
+      (att: any) => att.leave,
+    ).length;
+    const monthRow = worksheet.addRow([`January`]);
+    const departmentRow = worksheet.addRow([`Department : ${depart}`]);
 
-    // Table 1: summary header row and summary value row
+    monthRow.eachCell((cell) => {
+      cell.font = {
+        bold: true,
+        size: 32,
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "fafafa" },
+      };
+    });
+    departmentRow.eachCell((cell) => {
+      cell.font = {
+        bold: true,
+        size: 20,
+      };
+    });
+    const totalTableColumns = dates.length + 1;
+    worksheet.mergeCells(
+      monthRow.number,
+      1,
+      monthRow.number,
+      totalTableColumns,
+    );
+    worksheet.mergeCells(
+      departmentRow.number,
+      1,
+      departmentRow.number,
+      totalTableColumns,
+    );
+
+    const summaryHeaders = [
+      "EmpCode",
+      "Name",
+      "Present",
+      "Holiday",
+      "WeekOff",
+      "HalfDay",
+      "Absent",
+      "Leave",
+      "PaidDay",
+      "Total Work Hrs",
+    ];
     const summaryValues = [
       empCode,
       name,
@@ -92,63 +112,52 @@ export const exportExcelReport1 = async (
       formatDuration(getSummaryValue(summaryData, "WorkHrs")),
     ];
 
-    const summaryHeaderRow = worksheet.addRow(new Array(totalWorksheetColumns).fill(""));
-    const summaryValueRow = worksheet.addRow(new Array(totalWorksheetColumns).fill(""));
-    const baseSpan = Math.floor(totalWorksheetColumns / summaryHeaders.length);
-    const extraSpan = totalWorksheetColumns % summaryHeaders.length;
+    const summaryHeaderRow = worksheet.addRow(
+      new Array(totalTableColumns).fill(""),
+    );
+    const summaryValueRow = worksheet.addRow(
+      new Array(totalTableColumns).fill(""),
+    );
+    const baseSpan = Math.floor(totalTableColumns / summaryHeaders.length);
+    const extraSpan = totalTableColumns % summaryHeaders.length;
     let startColumn = 1;
 
     summaryHeaders.forEach((header, index) => {
       const span = baseSpan + (index < extraSpan ? 1 : 0);
       const endColumn = startColumn + span - 1;
 
-      worksheet.mergeCells(summaryHeaderRow.number, startColumn, summaryHeaderRow.number, endColumn);
-      worksheet.mergeCells(summaryValueRow.number, startColumn, summaryValueRow.number, endColumn);
+      worksheet.mergeCells(
+        summaryHeaderRow.number,
+        startColumn,
+        summaryHeaderRow.number,
+        endColumn,
+      );
+      worksheet.mergeCells(
+        summaryValueRow.number,
+        startColumn,
+        summaryValueRow.number,
+        endColumn,
+      );
 
-      for (let columnNumber = startColumn; columnNumber <= endColumn; columnNumber++) {
-        const headerPartCell = worksheet.getCell(summaryHeaderRow.number, columnNumber);
-        const valuePartCell = worksheet.getCell(summaryValueRow.number, columnNumber);
-
-        headerPartCell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "000000" },
-        };
-        headerPartCell.border = {
-          top: { style: "thin", color: { argb: "000000" } },
-          left: columnNumber === startColumn ? { style: "thin", color: { argb: "000000" } } : undefined,
-          bottom: { style: "thin", color: { argb: "000000" } },
-          right: columnNumber === endColumn ? { style: "thin", color: { argb: "000000" } } : undefined,
-        };
-
-        valuePartCell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "F3F4F6" },
-        };
-        valuePartCell.border = {
-          top: { style: "thin", color: { argb: "000000" } },
-          left: columnNumber === startColumn ? { style: "thin", color: { argb: "000000" } } : undefined,
-          bottom: { style: "thin", color: { argb: "000000" } },
-          right: columnNumber === endColumn ? { style: "thin", color: { argb: "000000" } } : undefined,
-        };
-      }
-
-      const headerCell = worksheet.getCell(summaryHeaderRow.number, startColumn);
-      const valueCell = worksheet.getCell(summaryValueRow.number, startColumn);
+      const headerCell = summaryHeaderRow.getCell(startColumn);
+      const valueCell = summaryValueRow.getCell(startColumn);
 
       headerCell.value = header;
-      headerCell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-      headerCell.alignment = { horizontal: "center", vertical: "middle" };
+      headerCell.font = {
+        bold: true,
+        color: { argb: "FFFFFFFF" },
+      };
+      headerCell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "000000" },
+      };
 
       valueCell.value = summaryValues[index];
-      valueCell.font = { bold: false, color: { argb: "111827" } };
-      valueCell.alignment = { horizontal: "center", vertical: "middle" };
 
       startColumn = endColumn + 1;
     });
 
-    // Table 2: daily attendance matrix
     const matrixHeaderRow = worksheet.addRow(["Label", ...dates]);
     matrixHeaderRow.eachCell((cell) => {
       cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
@@ -188,7 +197,7 @@ export const exportExcelReport1 = async (
         return;
       }
 
-      const status = getStatusShort(att);
+      const status = getStatus(att);
 
       inRow.push(att.in_formatted_time || "-");
       outRow.push(att.out_formatted_time || "-");
@@ -200,36 +209,6 @@ export const exportExcelReport1 = async (
     const row2 = worksheet.addRow(outRow);
     const row3 = worksheet.addRow(workRow);
     const row4 = worksheet.addRow(statusRow);
-
-    [row1, row2, row3, row4].forEach((row, index) => {
-      row.eachCell((cell, colNumber) => {
-        cell.alignment = { horizontal: "center", vertical: "middle" };
-        cell.border = {
-          top: { style: "thin", color: { argb: "D1D5DB" } },
-          left: { style: "thin", color: { argb: "D1D5DB" } },
-          bottom: { style: "thin", color: { argb: "D1D5DB" } },
-          right: { style: "thin", color: { argb: "D1D5DB" } },
-        };
-
-        if (colNumber === 1) {
-          cell.font = { bold: true, color: { argb: "111827" } };
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "F3F4F6" },
-          };
-          return;
-        }
-
-        if (index % 2 === 1 && index !== 3) {
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "F9FAFB" },
-          };
-        }
-      });
-    });
 
     row4.eachCell((cell, colNumber) => {
       if (colNumber === 1) return;
@@ -269,9 +248,22 @@ export const exportExcelReport1 = async (
       cell.font = { bold: true, color: { argb: "111827" } };
       cell.alignment = { horizontal: "center", vertical: "middle" };
     });
-
-    // gap between employees
     worksheet.addRow([]);
+    worksheet.addRow([]);
+    worksheet.addRow([]);
+    worksheet.addRow([]);
+  });
+
+  worksheet.eachRow({ includeEmpty: true }, (row) => {
+    row.eachCell({ includeEmpty: true }, (cell) => {
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+    });
   });
 
   const buffer = await workbook.xlsx.writeBuffer();
