@@ -1,6 +1,7 @@
 import { pdf } from "@react-pdf/renderer";
 import AttendancePDF from "../components/pdfGenerator/AttendancePDF";
 import type { AttendanceMonthlyRecordType } from "../types/AttendanceAPITypes";
+import { toast } from "react-toastify";
 
 const useDownloadPdf = () => {
     const downloadPDF = async (
@@ -23,11 +24,13 @@ const useDownloadPdf = () => {
             link.click();
 
             document.body.removeChild(link);
+            toast.success("PDF downloaded successfully!");
 
             setTimeout(() => URL.revokeObjectURL(url), 1000);
 
         } catch (error) {
             console.error("PDF Download Error:", error);
+            toast.error("Failed to download PDF. Please try again.");
         }
     }
 

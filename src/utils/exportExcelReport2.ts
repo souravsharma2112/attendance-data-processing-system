@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import type { AttendanceMonthlyRecordType } from "../types/AttendanceAPITypes";
+import { toast } from "react-toastify/unstyled";
 
 const getStatus = (item: any) => {
   if (item.holiday) return "Holiday";
@@ -24,7 +25,7 @@ export const exportExcelReport2 = async (
       : data;
 
   if (!selectedEmp?.length) {
-    alert("No data found for selected employees");
+    toast.error("No data found for selected employees");
     return;
   }
 

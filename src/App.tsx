@@ -2,6 +2,7 @@
 import './App.css'
 import { BrowserRouter } from 'react-router-dom'
 import MainRoutes from './routes'
+import ToasterWrapper from './components/toastWrapper/ToastWrapper'
 
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
     <>
       <BrowserRouter>
         <MainRoutes />
+        <ToasterWrapper />
       </BrowserRouter>
     </>
   )

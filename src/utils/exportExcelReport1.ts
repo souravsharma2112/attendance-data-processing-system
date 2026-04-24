@@ -6,6 +6,7 @@ import {
   getStatus,
 } from "../components/pdfGenerator/pdfHelper";
 import type { AttendanceMonthlyRecordType } from "../types/AttendanceAPITypes";
+import { toast } from "react-toastify";
 
 
 const getSummaryValue = (
@@ -26,7 +27,7 @@ export const exportExcelReport1 = async (
       : data;
 
   if (!selectedEmp.length) {
-    alert("No data found for selected employees");
+    toast.error("No data found for selected employees");
     return;
   }
 
@@ -269,5 +270,8 @@ export const exportExcelReport1 = async (
   });
 
   const buffer = await workbook.xlsx.writeBuffer();
+  if(buffer){
+    toast.success("Report downloaded successfully!");
+  }
   saveAs(new Blob([buffer]), "Attendance_Matrix_Report.xlsx");
 };

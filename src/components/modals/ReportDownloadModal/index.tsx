@@ -5,6 +5,7 @@ import { exportExcelReport2 } from "../../../utils/exportExcelReport2";
 import { exportExcelReport1 } from "../../../utils/exportExcelReport1";
 import useDownloadPdf from "../../../hooks/useDownloadPdf";
 import type { ReportDownloadModalType } from "../../../types/modal/ReportDownloadModalType";
+import { toast } from "react-toastify";
 
 
 const ReportDownloadModal = ({
@@ -42,11 +43,12 @@ const ReportDownloadModal = ({
 
     const handleDownload = useCallback(() => {
         if (selectedEmployees.length === 0) {
-            alert("Please select at least one employee.");
+            toast.warning("Please select at least one employee.");
             return;
         }
         if (recordType === "record2") {
             exportExcelReport2(employees, selectedEmployees);
+            toast.success("Report downloaded successfully!");
         }
         if (recordType === "record1" && format === "excel") {
             exportExcelReport1(employees, selectedEmployees);
@@ -54,6 +56,7 @@ const ReportDownloadModal = ({
         if (recordType === "record1" && format === "pdf") {
             downloadPDF(employees, record, selectedEmployees);
         }
+        handleClose();
     }, [selectedEmployees, format, employees, record, downloadPDF, recordType]);
 
     const handleClose = useCallback(() => {
