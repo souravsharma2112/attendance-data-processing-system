@@ -17,7 +17,7 @@ const Dashboard = () => {
       <main className='flex-1 h-full w-full rounded-[20px] space-y-4 overflow-y-auto bg-yellow-200 overflow-x-none p-4'>
         {(record.length > 0) && record.map((item, index) => <EmployeeCard key={`employee-${index}`} data={item} />)}
       </main>
-      <RightAside record={data}/>
+      <RightAside employees={data} record={record} />
     </div>
   )
 }

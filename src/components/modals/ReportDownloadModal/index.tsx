@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styles from "./style.module.css";
 import { Button, CheckboxComponent } from "../../ui";
-import { exportToExcel } from "../../../utils/exportExcelReport2";
+import { exportExcelReport2 } from "../../../utils/exportExcelReport2";
 import { exportExcelReport1 } from "../../../utils/exportExcelReport1";
 
 type Employee = {
@@ -11,28 +11,69 @@ type Employee = {
 
 type Props = {
     isOpen: boolean;
+    isPDF: boolean;
     onClose: () => void;
     employees: Employee[];
-    onDownload: (selectedIds: number[], format: string) => void;
+    record: Employee[];
 };
 
 const ReportDownloadModal = ({
     isOpen,
     onClose,
     employees,
-    onDownload,
+    isPDF = false,
+    record,
 }: Props) => {
     const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
-    const [format, setFormat] = useState("pdf");
+    const [format, setFormat] = useState("excel");
+    console.log(format, "format");
 
+    const recordType = isPDF ? "record1" : "record2";
     if (!isOpen) return null;
-    console.log(employees , "e");
-    
+
+    const allEmployeeIds = record?.map((emp) => emp.employeeID) || [];
+
+    const isAllSelected =
+        allEmployeeIds.length > 0 &&
+        selectedEmployees.length === allEmployeeIds.length;
+
+    const handleCheckboxChange = (id: number) => {
+        setSelectedEmployees((prev) =>
+            prev.includes(id)
+                ? prev.filter((empId) => empId !== id)
+                : [...prev, id]
+        );
+    };
+
+    console.log(selectedEmployees);
+
+    const handleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedEmployees([]);
+        } else {
+            setSelectedEmployees(allEmployeeIds);
+        }
+    };
 
     const handleDownload = () => {
-  exportExcelReport1(employees, [1, 2]);
-//   exportToExcel(employees, [1, 2]);
-};
+        if (selectedEmployees.length === 0) {
+            alert("Please select at least one employee.");
+            return;
+        }
+        if (recordType === "record2") {
+            exportExcelReport2(employees, selectedEmployees);
+        }
+        if (recordType === "record1" && format === "excel") {
+            exportExcelReport1(employees, selectedEmployees);
+        }
+    };
+
+    const handleClose = () => {
+        setSelectedEmployees([]);
+        setFormat("excel");
+        onClose(recordType);
+    }
+    console.log(record, "record");
 
     return (
         <div className={styles.overlay}>
@@ -41,37 +82,40 @@ const ReportDownloadModal = ({
                     <div className={styles.section}>
                         <p className={styles.title}>Employees</p>
                         <div className={styles.box}>
-                            {employees.map((emp, index) => (
+                            {record?.map((emp) => (
                                 <CheckboxComponent
-                                    key={index}
-                                    name={`employee-${emp.id}`}
+                                    key={emp.employeeID}
+                                    name={`employee-${emp.employeeID}`}
                                     label={emp.name}
-                                    checked={selectedEmployees.includes(emp.id)}
-                                    onChange={() => { }}
+                                    checked={selectedEmployees.includes(emp.employeeID)}
+                                    onChange={(e) => handleCheckboxChange(emp.employeeID)}
                                 />
                             ))}
 
                             <CheckboxComponent
-                                name={`employeeAll`}
-                                label={"Select All"}
-                                // checked={selectedEmployees.includes(emp.id)}
-                                onChange={() => { }}
+                                name="employeeAll"
+                                label="Select All"
+                                checked={isAllSelected}
+                                onChange={(e) => handleSelectAll()}
                             />
                         </div>
                     </div>
+
                     <div className={styles.section}>
                         <p className={styles.title}>Export In</p>
                         <div className={styles.box}>
-                            <label className={styles.option}>
-                                <input
-                                    type="radio"
-                                    name="format"
-                                    value="pdf"
-                                    checked={format === "pdf"}
-                                    onChange={() => setFormat("pdf")}
-                                />
-                                PDF
-                            </label>
+                            {isPDF && (
+                                <label className={styles.option}>
+                                    <input
+                                        type="radio"
+                                        name="format"
+                                        value="pdf"
+                                        checked={format === "pdf"}
+                                        onChange={() => setFormat("pdf")}
+                                    />
+                                    PDF
+                                </label>
+                            )}
 
                             <label className={styles.option}>
                                 <input
@@ -86,11 +130,17 @@ const ReportDownloadModal = ({
                         </div>
                     </div>
                 </div>
-                <div >
+
+                <div className="space-y-4">
                     <Button
                         title="Download Report"
                         className="w-full"
                         onClick={handleDownload}
+                    />
+                    <Button
+                        title="Close"
+                        className="w-full"
+                        onClick={handleClose}
                     />
                 </div>
             </div>

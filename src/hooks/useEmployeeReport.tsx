@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import { EmployeeDataDefault, type EmployeeDataType } from "../types/card/EmployeeCardType";
 
 const useEmployeeReport = ({ employeeData }) => {
-
   const record = useMemo(() => {
     if (!Array.isArray(employeeData)) return [];
 
     return employeeData.map((employee) => {
       const stats: EmployeeDataType = {
         ...EmployeeDataDefault,
+        employeeID : employee?.employee?.id ?? "---",
         name: `${employee?.employee?.first_name} ${employee?.employee?.last_name}` || "---",
         designation: employee?.employee?.designation ?? "---",
       };

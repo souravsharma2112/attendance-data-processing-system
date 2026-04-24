@@ -10,7 +10,7 @@ const getStatus = (item) => {
   return "P";
 };
 
-export const exportToExcel = async (data, selectedIds = []) => {
+export const exportExcelReport2 = async (data, selectedIds = []) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Attendance");
 
