@@ -35,7 +35,6 @@ export const calculateSummary = (attendances: AttendanceItem[] = []) => {
         if (!a.absent) summary.paid++;
     });
 
-    // return summary;
     const summaryData = [
         { label: "Present", value: summary.present },
         { label: "Holiday", value: summary.holiday },
